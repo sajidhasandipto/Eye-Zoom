@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/all'
 import gsap from 'gsap'
 import { useRef } from 'react'
 import Lenis from 'lenis'
+import { ChevronsDown } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,13 +16,14 @@ const HeroSection = () => {
   const heroRef = useRef(null);
   const skyContainerRef = useRef(null);
   const windowContainerRef = useRef(null);
-
+  const heroHeaderRef = useRef(null);
 
   useGSAP(() => {
 
     // Current refs
     const skyContainer = skyContainerRef.current;
     const windowContainer = windowContainerRef.current;
+    const heroHeader = heroHeaderRef.current;
 
     // Lenis for smooth scrolling
     // Initialize a new Lenis instance for smooth scrolling
@@ -74,6 +76,14 @@ const HeroSection = () => {
           scale: windowScale,
         });
 
+        // Moving the hero-header up the screen
+        const perspective = 1000;
+        const zScale = perspective * (1 - 1 / windowScale);
+
+        gsap.set(heroHeader, {
+          z: zScale,
+        })
+
         const blurAmount = Math.max(0, SCALE_CONSTANT - windowScale * 1.5);
 
         //  Moving downward with the scroll
@@ -98,7 +108,7 @@ const HeroSection = () => {
   }, [])
 
   return (
-    <div>
+    <div className='text-[#ffffff96]'>
       <section
         ref={heroRef}
         className='hero'
@@ -116,6 +126,21 @@ const HeroSection = () => {
           className='window-container'
         >
           <img src={windowImg} />
+        </div>
+
+        <div
+          ref={heroHeaderRef}
+          className='hero-header'
+        >
+          <div className='absolute top-10 left-1/2 -translate-x-1/2 flex'>
+            <span className='tracking-widest text-2xl font-bold'>Scroll Down</span>
+            <span><ChevronsDown size={40} /></span>
+          </div>
+
+          <div className='absolute right-0 top-0 translate-y-1/2 h-svh p-8 text-6xl text-center'>
+            <h1 className="drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)] leading-loose">~Words <br /> Left <br /> Unspoken~</h1>
+          </div>
+
         </div>
       </section>
 
