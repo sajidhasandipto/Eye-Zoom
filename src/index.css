@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@layer base {
+  img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+  .sky-container,
+  .window-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    will-change: transform;
+  }
+}
+
+
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 4px; 
+}
+
+/* background behind the thumb */
+::-webkit-scrollbar-track {
+  background: #171717; 
+}
+
+/* The draggable thumb */
+::-webkit-scrollbar-thumb {
+  background:#3a5881;     
+  border-radius: 999px;       
+}
+
+/* Thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background:#3a3a3a; 
+}
