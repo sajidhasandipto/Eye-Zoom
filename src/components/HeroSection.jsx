@@ -4,12 +4,13 @@ import windowImg from '../assets/eyeWindowHollow.png'
 import { ScrollTrigger } from 'gsap/all'
 import gsap from 'gsap'
 import { useRef } from 'react'
+import Lenis from 'lenis'
 
 gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection = () => {
 
-  // references
+  // References
   const heroRef = useRef(null);
   const skyContainerRef = useRef(null);
   const windowContainerRef = useRef(null);
@@ -17,10 +18,28 @@ const HeroSection = () => {
 
   useGSAP(() => {
 
-    // current refs
+    // Current refs
     const skyContainer = skyContainerRef.current;
     const windowContainer = windowContainerRef.current;
 
+    // Lenis for smooth scrolling
+    // Initialize a new Lenis instance for smooth scrolling
+    const lenis = new Lenis();
+
+    // Synchronize Lenis scrolling with GSAP's ScrollTrigger plugin
+    lenis.on('scroll', ScrollTrigger.update);
+
+    // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
+    // This ensures Lenis's smooth scroll animation updates on each GSAP tick
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000); // Convert time from seconds to milliseconds
+    });
+
+    // Disable lag smoothing in GSAP to prevent any delay in scroll animations
+    gsap.ticker.lagSmoothing(0);
+
+
+    // ScrollTrigger implementation
     ScrollTrigger.create({
       trigger: heroRef.current,
       start: 'top top',
@@ -42,7 +61,7 @@ const HeroSection = () => {
         gsap.set(windowContainer, {
           scale: windowScale,
         });
-        
+
         // Height calculation to calculate moveDistance
         const skyHeight = skyContainer.offsetHeight;
         const viewportHeight = window.innerHeight;
@@ -50,8 +69,8 @@ const HeroSection = () => {
         //  Moving downward with the scroll
         gsap.set(skyContainer, {
           y: -progress * moveDistance,
-          filter: `blur(${SCALE_CONSTANT - (windowScale*1.5)}px)`
-        });    
+          filter: `blur(${SCALE_CONSTANT - (windowScale * 1.5)}px)`
+        });
 
       }
 
