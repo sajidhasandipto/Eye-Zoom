@@ -1,6 +1,7 @@
 import { useGSAP } from '@gsap/react'
 import sky from '../assets/pannel3.jpg'
-import windowImg from '../assets/eyeWindowHollow.png'
+import end from '../assets/end.jpg'
+import windowImg from '../assets/eyeWindowHollowBW.png'
 import { ScrollTrigger } from 'gsap/all'
 import gsap from 'gsap'
 import { useRef } from 'react'
@@ -31,21 +32,32 @@ const HeroSection = () => {
 
     // Add Lenis's requestAnimationFrame (raf) method to GSAP's ticker
     // This ensures Lenis's smooth scroll animation updates on each GSAP tick
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000); // Convert time from seconds to milliseconds
-    });
+    const tickerFn = (time) => {
+      lenis.raf(time * 1000);
+    };
+    gsap.ticker.add(tickerFn);
 
     // Disable lag smoothing in GSAP to prevent any delay in scroll animations
     gsap.ticker.lagSmoothing(0);
 
+    let moveDistance = 0;
 
     // ScrollTrigger implementation
-    ScrollTrigger.create({
+    const scrollAnim = ScrollTrigger.create({
       trigger: heroRef.current,
       start: 'top top',
-      end: `${4 * window.innerHeight}px`,
+      end: `+=${4 * window.innerHeight}px`,
       pin: true,
       scrub: 1,
+      anticipatePin: 1,
+
+      onRefresh: () => {
+        // Height calculation to calculate moveDistance
+        const skyHeight = skyContainer.offsetHeight;
+        const viewportHeight = window.innerHeight;
+        moveDistance = skyHeight - viewportHeight;
+      },
+
       onUpdate: (self) => {
         const progress = self.progress;
         const SCALE_CONSTANT = 20;
@@ -62,42 +74,60 @@ const HeroSection = () => {
           scale: windowScale,
         });
 
-        // Height calculation to calculate moveDistance
-        const skyHeight = skyContainer.offsetHeight;
-        const viewportHeight = window.innerHeight;
-        const moveDistance = skyHeight - viewportHeight;
+        const blurAmount = Math.max(0, SCALE_CONSTANT - windowScale * 1.5);
+
         //  Moving downward with the scroll
         gsap.set(skyContainer, {
           y: -progress * moveDistance,
-          filter: `blur(${SCALE_CONSTANT - (windowScale * 1.5)}px)`
+          filter: `blur(${blurAmount}px)`
         });
 
       }
 
     })
 
+    ScrollTrigger.refresh();
+
+    // Cleanup function
+    return () => {
+      lenis.destroy();
+      gsap.ticker.remove(tickerFn);
+      scrollAnim.kill();
+    };
+
   }, [])
 
   return (
-    <section
-      ref={heroRef}
-      className='hero'
-    >
-
-      <div
-        ref={skyContainerRef}
-        className='sky-container'
+    <div>
+      <section
+        ref={heroRef}
+        className='hero'
       >
-        <img src={sky} />
-      </div>
 
-      <div
-        ref={windowContainerRef}
-        className='window-container'
-      >
-        <img src={windowImg} />
-      </div>
-    </section>
+        <div
+          ref={skyContainerRef}
+          className='sky-container'
+        >
+          <img src={sky} />
+        </div>
+
+        <div
+          ref={windowContainerRef}
+          className='window-container'
+        >
+          <img src={windowImg} />
+        </div>
+      </section>
+
+      <section className="relative w-full min-h-screen">
+        <img
+          src={end}
+          alt="End section"
+          className="w-full h-screen object-cover block"
+          onLoad={() => ScrollTrigger.refresh()}
+        />
+      </section>
+    </div>
   )
 }
 
